@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require ('mongoose');
+const {ensureAuthenticated} = require('../helpers/auth');
 
 //Load idea model
 require('../models/Idea');
 const Idea = mongoose.model('ideas');
 
-router.get('/add', (req, res) => {
+router.get('/add', ensureAuthenticated, (req, res) => {
     res.render('ideas/add');
 });
 
@@ -15,25 +16,33 @@ router.get('/edit/:id', (req, res) => {
         _id: req.params.id
     })
     .then(idea => {
-        res.render('ideas/edit',{
-            idea: idea
-        });
+        if(idea.user != req.user.id){
+            req.flash('error_msg', 'Not Authorized');
+            res.redirect('/ideas');
+        }else{
+            res.render('ideas/edit',{
+                idea: idea
+            });
+        }
     })
     
 })
 
-router.get('/', (req, res) => {
-console.log('dfd');
-    Idea.find({})
+router.get('/', ensureAuthenticated, (req, res) => {
+console.log('req:');
+    Idea.find({user: req.body})
     .sort({date : 'desc'})
     .then(ideas => {
         res.render('ideas/list', {
           ideas: ideas
         });
+    })
+    .catch(err => {
+        console.log("Error when fetching ideas fron mongoDB");
     });
 });
 
-router.post('/', (req, res) => {
+router.post('/', ensureAuthenticated, (req, res) => {
   var errors = [];
 
   if(!req.body.title){
@@ -52,7 +61,8 @@ router.post('/', (req, res) => {
   } else {
       const newUser = {
           title : req.body.title,
-          details : req.body.details      
+          details : req.body.details,
+          user: req.user.id
         }
 
       new Idea(newUser)
@@ -63,7 +73,7 @@ router.post('/', (req, res) => {
   }
 
 });
-router.put('/:id', (req,res) => {
+router.put('/:id', ensureAuthenticated,(req,res) => {
     Idea.findOne({
         _id: req.params.id
     })
@@ -78,7 +88,7 @@ router.put('/:id', (req,res) => {
     })
 });
 
-router.delete('/:id', (req,res) => {
+router.delete('/:id', ensureAuthenticated, (req,res) => {
     Idea.deleteOne({
         _id: req.params.id
     })

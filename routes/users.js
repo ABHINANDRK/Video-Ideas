@@ -17,12 +17,12 @@ router.get('/login', (req, res)=>{
     res.render('users/login');
 });
 router.post('/login', (req, res, next) => {
-   
-    passport.authenticate('local', {
-        successRedirect: '/ideas',
-        failureRedirect: '/users/login',
-        failureFlash: true
-    })(req, res, next);
+  
+    // passport.authenticate('local', {
+    //     successRedirect: '/ideas',
+    //     failureRedirect: '/users/login',
+    //     failureFlash: true
+    // })(req, res, next);
 });
 router.get('/register', (req, res)=>{
     res.render('users/register');
@@ -82,9 +82,22 @@ router.post('/register', (req, res)=>{
     }
     
 });
+router.get('/google/login', (req, res, next) => {
+    passport.authenticate('google', {
+            scope: [ 'https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/userinfo.email'],
+            successRedirect: '/ideas',
+            failureRedirect: '/users/login',
+            failureFlash: true
+        })(req, res, next);
+
+})
 router.get('/logout', (req, res) => {
     req.logout();
     req.flash('success_msg','You are logged out');
     res.redirect('/users/login');
 });
+router.get('/google/callback',passport.authenticate('google'),(req, res) => {
+     res.redirect('/');
+})
 module.exports = router;
