@@ -29,8 +29,8 @@ router.get('/edit/:id', (req, res) => {
 })
 
 router.get('/', ensureAuthenticated, (req, res) => {
-console.log('req:');
-    Idea.find({user: req.body})
+console.log('req.user:'+req.user);
+    Idea.find({user: req.user.id})
     .sort({date : 'desc'})
     .then(ideas => {
         res.render('ideas/list', {
@@ -70,6 +70,9 @@ router.post('/', ensureAuthenticated, (req, res) => {
           .then(idea => {
               res.redirect('/ideas');
           })
+          .catch(err => {
+              console.log("error while saving ideas:" + err)
+          });
   }
 
 });

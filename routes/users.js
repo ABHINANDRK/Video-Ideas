@@ -18,11 +18,11 @@ router.get('/login', (req, res)=>{
 });
 router.post('/login', (req, res, next) => {
   
-    // passport.authenticate('local', {
-    //     successRedirect: '/ideas',
-    //     failureRedirect: '/users/login',
-    //     failureFlash: true
-    // })(req, res, next);
+    passport.authenticate('local', {
+        successRedirect: '/ideas',
+        failureRedirect: '/users/login',
+        failureFlash: true
+    })(req, res, next);
 });
 router.get('/register', (req, res)=>{
     res.render('users/register');
